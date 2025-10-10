@@ -27,16 +27,14 @@ class libro extends Model
 
 
     if ($buscar) {
-        if (is_numeric($buscar)) {
-            $query->where('id', $buscar);
-        } else {
+        
             $query->where(function ($q) use ($buscar) {
                 $q->where('titulo', 'like', "%{$buscar}%")
                   ->orWhere('autor', 'like', "%{$buscar}%")
                   ->orWhere('genero', 'like', "%{$buscar}%")
                   ->orWhere('idioma', 'like', "%{$buscar}%");
             });
-        }
+
     }
 
     return $query->paginate($cantidad);
