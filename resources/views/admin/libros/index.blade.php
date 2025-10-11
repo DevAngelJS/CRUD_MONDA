@@ -10,19 +10,11 @@
 @section('content')
     <div class="row">
         <div class="col-md-12">
-            @session('success')
-                <div class="alert alert-success alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    <h5><i class="icon fas fa-check"></i> ¡Éxito!</h5>
-                    {{ session('success') }}
-                </div>
-            @endsession
             <div class="card card-outline card-primary">
                 <div class="card-header">
                     <h3 class="card-title"><b>Libros registrados</b></h3>
-
                     <div class="card-tools">
-                        <a class="btn btn-primary" href=" {{ url('admin/libros/create') }}" class="btn btn-tool">
+                        <a href="" data-toggle="modal" data-target="#createModal" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
                             <b>Crear Nuevo</b>
                         </a>
@@ -119,186 +111,8 @@
                                             <i class="fas fa-edit text-white"></i>
                                         </a>
 
-                                        <!-- MODAL DE EDITAR -->
-                                        <div class="modal fade" id="showModal{{ $libro->id }}" tabindex="-1"
-                                            role="dialog" aria-labelledby="viewModalLabel{{ $libro->id }}"
-                                            aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header bg-info">
-                                                        <h5 class="modal-title" id="viewModalLabel{{ $libro->id }}">
-                                                            Editar libro</h5>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <form id="editForm" action="{{ url('admin/libros/' . $libro->id) }}" method="POST">
-                                                        <div class="modal-body">
-                                                            @csrf
-                                                            <div class="row">
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label for="titulo_{{ $libro->id }}">Título</label>
-                                                                        <div class="input-group mb-3">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text inline-block"><i
-                                                                                        class="fas fa-tag"></i></span>
-                                                                            </div>
-                                                                            <input type="text" class="form-control" id="titulo_{{ $libro->id }}" name="titulo"
-                                                                                placeholder="Ingrese el título del libro" value="{{ $libro->titulo }}">
-                                                                        </div>
-                                                                        @error('titulo')
-                                                                            <div class="alert text-danger p-0 m-0">
-                                                                                <b>{{ 'Este campo es obligatorio.' }}</b>
-                                                                            </div>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label for="autor_{{ $libro->id }}">Autor</label>
-                                                                        <div class="input-group mb-3">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text inline-block"><i
-                                                                                        class="fas fa-pen"></i></span>
-                                                                            </div>
-                                                                            <input type="text" class="form-control" id="autor_{{ $libro->id }}" name="autor"
-                                                                                placeholder="Ingrese el autor del libro" value="{{ $libro->autor }}">
-                                                                        </div>
-                                                                        @error('autor')
-                                                                            <div class="alert text-danger p-0 m-0">
-                                                                                <b>{{ 'Este campo es obligatorio.' }}</b>
-                                                                            </div>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label for="año_publicacion_{{ $libro->id }}">Año de publicación</label>
-                                                                        <div class="input-group mb-3">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text inline-block"><i
-                                                                                        class="fas fa-calendar"></i></span>
-                                                                            </div>
-                                                                            <input type="date" class="form-control" id="año_publicacion_{{ $libro->id }}"
-                                                                                name="año_publicacion" placeholder="Ingrese el año de publicación del libro"
-                                                                                value="{{ $libro->año_publicacion }}">
-                                                                        </div>
-                                                                        @error('año_publicacion')
-                                                                            <div class="alert text-danger p-0 m-0">
-                                                                                <b>{{ 'Este campo es obligatorio.' }}</b>
-                                                                            </div>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                
-                                                            <div class="row">
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label for="genero_{{ $libro->id }}">Género</label>
-                                                                        <div class="input-group mb-3">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text inline-block"><i
-                                                                                        class="fas fa-book"></i></span>
-                                                                            </div>
-                                                                            <input type="text" class="form-control" id="genero_{{ $libro->id }}" name="genero"
-                                                                                placeholder="Ingrese el genero del libro" value="{{ $libro->genero }}">
-                                                                        </div>
-                                                                        @error('genero')
-                                                                            <div class="alert text-danger p-0 m-0">
-                                                                                <b>{{ 'Este campo es obligatorio.' }}</b>
-                                                                            </div>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                
-                                
-                                
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label for="idioma_{{ $libro->id }}">Idioma</label>
-                                                                        <div class="input-group mb-3">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text inline-block"><i
-                                                                                        class="fas fa-language"></i></span>
-                                                                            </div>
-                                                                            <select name="idioma" id="idioma_{{ $libro->id }}" class="form-control">
-                                                                                <option value="" disabled selected>Seleccione un idioma</option>
-                                                                                <option value="Español"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Español' ? 'selected' : '' }}>
-                                                                                    Español</option>
-                                                                                <option value="Inglés"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Inglés' ? 'selected' : '' }}>
-                                                                                    Inglés</option>
-                                                                                <option value="Francés"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Francés' ? 'selected' : '' }}>
-                                                                                    Francés</option>
-                                                                                <option value="Alemán"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Alemán' ? 'selected' : '' }}>
-                                                                                    Alemán</option>
-                                                                                <option value="Italiano"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Italiano' ? 'selected' : '' }}>
-                                                                                    Italiano</option>
-                                                                                <option value="Portugués"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Portugués' ? 'selected' : '' }}>
-                                                                                    Portugués</option>
-                                                                                <option value="Chino"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Chino' ? 'selected' : '' }}>Chino
-                                                                                </option>
-                                                                                <option value="Japonés"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Japonés' ? 'selected' : '' }}>
-                                                                                    Japonés</option>
-                                                                                <option value="Ruso"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Ruso' ? 'selected' : '' }}>Ruso
-                                                                                </option>
-                                                                                <option value="Árabe"
-                                                                                    {{ old('idioma', $libro->idioma) == 'Árabe' ? 'selected' : '' }}>Árabe
-                                                                                </option>
-                                                                            </select>
-                                                                        </div>
-                                                                        @error('idioma')
-                                                                            <div class="alert text-danger p-0 m-0">
-                                                                                <b>{{ 'Este campo es obligatorio.' }}</b>
-                                                                            </div>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                
-                                                                <div class="col-md-4">
-                                                                    <div class="form-group">
-                                                                        <label for="cantidad_stock_{{ $libro->id }}">Cantidad en Stock</label>
-                                                                        <div class="input-group mb-3">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text inline-block"><i
-                                                                                        class="fas fa-box"></i></span>
-                                                                            </div>
-                                                                            <input type="number" class="form-control" id="cantidad_stock_{{ $libro->id }}"
-                                                                                name="cantidad_stock" placeholder="Ingrese la cantidad en stock del libro"
-                                                                                value="{{ $libro->cantidad_stock }}">
-                                                                        </div>
-                                                                        @error('cantidad_stock')
-                                                                            <div class="alert text-danger p-0 m-0">
-                                                                                <b>{{ 'Este campo es obligatorio.' }}</b>
-                                                                            </div>
-                                                                        @enderror
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <div class="form-group" style="text-align: right;">
-                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                                                <button type="submit" class="btn btn-success">Guardar</button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @include('admin.libros.components.editModal')
+
                                         <!-- Botón que abre el modal -->
                                         <button type="button" class="btn btn-danger" data-toggle="modal"
                                             data-target="#confirmarEliminar{{ $libro->id }}" title="Eliminar">
@@ -346,38 +160,126 @@
                     <div class="d-flex justify-content-center mt-3">
                         {{ $libros->appends(['buscar' => $buscar])->links() }}
                     </div>
-
+                    @include('admin.libros.components.createModal')
                 </div>
                 <!-- /.card-body -->
             </div>
             <!-- /.card -->
         </div>
-    </div>
 @stop
 
 @section('js')
-<script>
+<script>    
 
+    // Muestra un alert de éxito (estilo similar al session('success'))
+    function showSuccessAlert(message){
+        const container = document.querySelector('.col-md-12') || document.body
+        // Si ya hay un alert de éxito, actualizar el mensaje y no crear otro
+        const existing = container.querySelector('.alert.alert-success.alert-dismissible[data-js-success]')
+        if (existing) {
+            const msgEl = existing.querySelector('.js-success-message')
+            if (msgEl) msgEl.textContent = message
+            return
+        }
 
-    editForm.addEventListener("submit", (e)=>{
-        e.preventDefault()
-        
-        const formData = new FormData(editForm)
+        const wrapper = document.createElement('div')
+        wrapper.innerHTML = `
+            <div class="alert alert-success alert-dismissible" data-js-success="1">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h5><i class="icon fas fa-check"></i> ¡Éxito!</h5>
+                <span class="js-success-message">${message}</span>
+            </div>
+        `
+        // Insertar al inicio del contenedor
+        container.insertBefore(wrapper.firstElementChild, container.firstChild)
+    }
 
-        fetch(editForm.action, {
-            method: "POST",
-            body: formData
-        }).then(res => {
-            if(!res.ok){
-                throw new Error("Error al actualizar el libro")
-            }
-            return res.json()
-        }).then(data => {
-            if(data.success){
-                console.log(data.message)
+    function reloadTable(){
+        const table = document.querySelector('#example1')
+        if(!table) return
+
+        fetch(window.location.href, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser()
+            const doc = parser.parseFromString(html, 'text/html')
+            const newTbody = doc.querySelector('#example1 tbody')
+            const oldTbody = table.querySelector('tbody')
+            if (newTbody && oldTbody) {
+                oldTbody.innerHTML = newTbody.innerHTML
             }
         })
+        .catch(err => console.error('Error al recargar la tabla:', err))
+        
+    }
+    
+    document.addEventListener('submit', (e) => {
+        const form = e.target
+        if (!form.matches('.editForm')) return
+        e.preventDefault()
 
+        const formData = new FormData(form)
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        }).then(res => {
+            if (!res.ok) throw new Error('Error al actualizar el libro')
+            return res.json()
+        }).then(data => {
+            if (data.success) {
+                // Cerrar la modal correspondiente al formulario
+                const $modal = $(form).closest('.modal')
+                $modal.modal('hide')
+                // Mostrar mensaje de éxito y recargar la tabla
+                showSuccessAlert(data.message || 'El libro se actualizó correctamente.')
+                reloadTable()
+            }
+        }).catch(err => {
+            throw new Error(err)
+        })
+    })
+
+    //CREAR LIBRO
+    const createForm = document.querySelector('#createForm')
+
+    createForm.addEventListener('submit', (e) => {
+        /*Prevenir el envio del formulario*/
+        e.preventDefault()
+        const formData = new FormData(createForm)
+        /*Enviamos la peticion*/
+        fetch(createForm.action, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json'
+        },
+        /*Enviamos los datos del formulario*/
+        body: formData
+
+        }).then(res => {
+        /*Si la peticion no es correcta*/
+        if (!res.ok) {
+            if (res.status === 422) {
+            const data = res.json()
+            console.error('Errores de validación:', data)
+            }
+            throw new Error('Error al crear el libro')
+        }
+        /*Si la peticion es correcta*/
+        return res.json()
+
+        }).then(data => {
+        /*Si la peticion es correcta*/
+        if (data.success) {
+            const $modal = $(createForm).closest('.modal')
+            $modal.modal('hide')
+            showSuccessAlert(data.message || 'El libro se creó correctamente.')
+            reloadTable()
+        }
+        }).catch(err => {
+            throw new Error(err)
+        })
     })
 
 </script>

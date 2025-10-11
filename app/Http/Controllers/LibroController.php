@@ -41,11 +41,18 @@ class LibroController extends Controller
             'idioma' => 'required|string|max:50',
             'cantidad_stock' => 'required|integer|min:0',
         ]);
-
-        libro::crearLibro($request->all());
-
-
-        return redirect()->route('admin.libros.index')->with('success', 'Libro creado correctamente.');
+        try{
+            libro::crearLibro($request->all());
+            return response()->json([
+                'success' => true,
+                'message' => 'Libro creado correctamente.',
+            ], 200);
+        }catch(Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el libro.'. $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -100,5 +107,5 @@ class LibroController extends Controller
 
         return redirect()->route('admin.libros.index')->with('error', 'Libro no encontrado.');
     }
-    
+
 }
