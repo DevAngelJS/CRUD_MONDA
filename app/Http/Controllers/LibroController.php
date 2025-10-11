@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\libro;
 use Illuminate\Http\Request;
+use Exception;
 
 
 class LibroController extends Controller
@@ -61,19 +62,30 @@ class LibroController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validar los datos del formulario
-        $request->validate([
-            'titulo' => 'required|string|max:255',
-            'autor' => 'required|string|max:255',
-            'año_publicacion' => 'required|date',
-            'genero' => 'required|string|max:100',
-            'idioma' => 'required|string|max:50',
-            'cantidad_stock' => 'required|integer|min:0',
-        ]);
+        try{
+            // Validar los datos del formulario
+            $request->validate([
+                'titulo' => 'required|string|max:255',
+                'autor' => 'required|string|max:255',
+                'año_publicacion' => 'required|date',
+                'genero' => 'required|string|max:100',
+                'idioma' => 'required|string|max:50',
+                'cantidad_stock' => 'required|integer|min:0',
+            ]);
+    
+            libro::actualizarLibro($id, $request->all());
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Libro actualizado correctamente.',
+            ], 200);
 
-        libro::actualizarLibro($id, $request->all());
-
-        return redirect()->route('admin.libros.index')->with('success', 'Libro actualizado correctamente.');
+        }catch(Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el libro.',
+            ], 500);
+        }
     }
 
     public function destroy($id)
