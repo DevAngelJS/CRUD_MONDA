@@ -8,4 +8,5 @@
 
 @section('content')
     <p>Bienvenido a la sección de administración de la librería.</p>
+
 @stop
