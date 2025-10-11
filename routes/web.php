@@ -19,7 +19,10 @@ Route::post('/admin/libros', [App\Http\Controllers\LibroController::class, 'stor
 Route::get('/admin/libros/{id}/edit', [App\Http\Controllers\LibroController::class, 'edit'])->name('admin.libros.edit')->middleware('auth');
 Route::post('/admin/libros/{id}', [App\Http\Controllers\LibroController::class, 'update'])->name('admin.libros.update')->middleware('auth');
 Route::delete('/admin/libros/{id}', [App\Http\Controllers\LibroController::class, 'destroy'])->name('admin.libros.destroy')->middleware('auth');
+
+/* USUARIOS */
 Route::get('/admin/usuarios', [App\Http\Controllers\UserController::class, 'index'])->name('admin.libros.usuarios.index')->middleware('auth');
+Route::post('/admin/usuarios', [App\Http\Controllers\UserController::class, 'store'])->name('admin.libros.usuarios.store')->middleware('auth');
 Route::get('/admin/usuarios/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('admin.libros.usuarios.edit')->middleware('auth');
 Route::post('/admin/usuarios/{id}', [App\Http\Controllers\UserController::class, 'update'])->name('admin.libros.usuarios.update')->middleware('auth');
 

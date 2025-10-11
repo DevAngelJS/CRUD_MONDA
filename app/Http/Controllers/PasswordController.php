@@ -26,13 +26,18 @@ class PasswordController extends Controller
     public function update(Request $request, $id)
     {
         // Validar los datos del formulario
-        $request->validate([
-            'password' => 'required',
-
-
+        $validated = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        User::actualizarContraseñaUsuario($id, $request->all());
+        User::actualizarContraseñaUsuario($id, $validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'La contraseña se actualizó correctamente.',
+            ]);
+        }
 
         return redirect()->route('admin.libros.usuarios.index')->with('success', 'contraseña actualizada correctamente.');
     }

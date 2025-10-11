@@ -26,6 +26,11 @@ class User extends Authenticatable
         'password',
     ];
 
+    public static function obtenerTodos()
+    {
+        return DB::table('users')->get();
+    }
+
 
         public static function obtenerPorId($id)
     {
