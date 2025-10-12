@@ -1,11 +1,3 @@
-@extends('adminlte::page')
-
-@section('content_header')
-    <h1>Crea un nuevo libro</h1>
-    <p>Bienvenido {{ auth()->user()->name }}.</p>
-@stop
-
-@section('content')
     <div class="row">
         <div class="col-md-12 m-auto">
             <div class="card card-primary">
@@ -20,7 +12,7 @@
                     </div>
                 </div>
                 <div class="card-body" style="display: block;">
-                    <form action="{{ route('admin.libros.store') }}" method="POST">
+                    <form id="createForm" action="{{ route('admin.libros.store') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="col-md-4">
@@ -98,8 +90,6 @@
                                 </div>
                             </div>
 
-
-
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="idioma">Idioma</label>
@@ -158,17 +148,3 @@
             </div>
         </div>
     </div>
-@stop
-
-@section('css')
-
-@stop
-
-@section('js')
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-    var f = document.getElementById('FormOpen');
-    if (f) { f.value = 1; }
-});
-</script>
-@stop
