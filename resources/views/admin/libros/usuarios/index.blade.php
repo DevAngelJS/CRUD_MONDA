@@ -105,7 +105,7 @@
             $(document).on('click', '.btn-editar', function(e) {
                 e.preventDefault();
                 const id = $(this).data('id');
-                const perfil = $(this).data('perfil') || '';
+                const perfil = $(this).data('perfil') || 'estudiante';
                 const name = $(this).data('name') || '';
                 const email = $(this).data('email') || '';
 

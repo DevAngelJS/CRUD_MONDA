@@ -42,9 +42,9 @@ class User extends Authenticatable
         public static function actualizarUsuario($id, $data)
     {
         return DB::table('users')->where('id', $id)->update([
-            'perfil' => $data['perfil'],
             'name' => $data['name'],
             'email' => $data['email'],
+            'perfil' => $data['perfil'] ?? 'estudiante',
             'updated_at' => Carbon::now(),
         ]);
     }

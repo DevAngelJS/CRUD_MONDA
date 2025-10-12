@@ -22,17 +22,17 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'perfil' => 'required|string|in:administrador,estudiante,bibliotecario',
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users,email',
+            'perfil' => 'required|string|in:administrador,estudiante,bibliotecario',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         // Crear usuario (Eloquent aplica hashing por el cast 'password' => 'hashed')
         $user = User::create([
-            'perfil' => $validated['perfil'],
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'perfil' => $validated['perfil'],
             'password' => $validated['password'],
         ]);
 
