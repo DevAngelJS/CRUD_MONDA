@@ -21,14 +21,15 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'perfil',
         'name',
         'email',
         'password',
     ];
 
-    public static function obtenerTodos()
+    public static function obtenerTodos($cantidad = 10)
     {
-        return DB::table('users')->get();
+        return DB::table('users')->paginate($cantidad);
     }
 
 
@@ -41,6 +42,7 @@ class User extends Authenticatable
         public static function actualizarUsuario($id, $data)
     {
         return DB::table('users')->where('id', $id)->update([
+            'perfil' => $data['perfil'],
             'name' => $data['name'],
             'email' => $data['email'],
             'updated_at' => Carbon::now(),

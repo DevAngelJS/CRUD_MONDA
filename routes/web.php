@@ -26,8 +26,7 @@ Route::post('/admin/usuarios', [App\Http\Controllers\UserController::class, 'sto
 Route::get('/admin/usuarios/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('admin.libros.usuarios.edit')->middleware('auth');
 Route::post('/admin/usuarios/{id}', [App\Http\Controllers\UserController::class, 'update'])->name('admin.libros.usuarios.update')->middleware('auth');
 
-// Route::get('/admin/contraseña', [App\Http\Controllers\PasswordController::class, 'index'])->name('admin.libros.contraseña.index')->middleware('auth');
-Route::get('/admin/contraseña/{id}/edit', [App\Http\Controllers\PasswordController::class, 'edit'])->name('admin.libros.contraseña.edit')->middleware('auth');
-Route::post('/admin/contraseña/{id}', [App\Http\Controllers\PasswordController::class, 'update'])->name('admin.libros.contraseña.update')->middleware('auth');
-
+// Route::get('/admin/contraseña', [App\Http\Controllers\UserController::class, 'index'])->name('admin.libros.contraseña.index')->middleware('auth');
+Route::get('/admin/contraseña/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('admin.libros.contraseña.edit')->middleware('auth');
+Route::post('/admin/contraseña/{id}', [App\Http\Controllers\UserController::class, 'updatePassword'])->name('admin.libros.contraseña.update')->middleware('auth');
 
