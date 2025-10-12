@@ -8,164 +8,18 @@
 @stop
 
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-outline card-primary">
-                <div class="card-header">
-                    <h3 class="card-title"><b>Libros registrados</b></h3>
-                    <div class="card-tools">
-                        <a href="" data-toggle="modal" data-target="#createModal" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            <b>Crear Nuevo</b>
-                        </a>
-                    </div>
-                    <!-- /.card-tools -->
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body" style="display: block;">
-                    <form action="{{ route('admin.libros.index') }}" method="GET" class="mb-3 d-flex"
-                        style="max-width: 400px;">
-                        <input type="text" name="buscar" class="form-control me-2"
-                            placeholder="Buscar por título, autor o género" value="{{ $buscar ?? '' }}">
-                        <button type="submit" class="btn btn-primary">Buscar</button>
-                    </form>
-
-                    <table id="example1" class="table table-bordered table-striped table-hover table-sm" border="1">
-                        <thead>
-                            <tr>
-                                <th>Titulo</th>
-                                <th>Autor</th>
-                                <th>Año de publicación</th>
-                                <th>Genero</th>
-                                <th>Idioma</th>
-                                <th>Cantidad en Stock</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            @if ($libros->isEmpty())
-                                <tr>
-                                    <td colspan="9" style="text-align: center;">No se encontraron libros.</td>
-                                </tr>
-                            @endif
-
-                            @foreach ($libros as $libro)
-                                <tr>
-                                    <td>{{ $libro->titulo }}</td>
-                                    <td>{{ $libro->autor }}</td>
-                                    <td style="text-align: center;">{{ $libro->año_publicacion }}</td>
-                                    <td>{{ $libro->genero }}</td>
-                                    <td>{{ $libro->idioma }}</td>
-                                    <td style="text-align: center;">{{ $libro->cantidad_stock }}</td>
-                                    <td style="text-align: center;">
-                                        @if ($libro->estatus == 1)
-                                            <span class="badge badge-success">Disponible</span>
-                                        @else
-                                            <span class="badge badge-danger">No disponible</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a href="#viewModal{{ $libro->id }}" data-toggle="modal" class="btn btn-info"
-                                            title="Ver detalles"><i class="fas fa-eye"></i></a>
-
-                                        <!-- Modal -->
-                                        <div class="modal fade" id="viewModal{{ $libro->id }}" tabindex="-1"
-                                            role="dialog" aria-labelledby="viewModalLabel{{ $libro->id }}"
-                                            aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header bg-info">
-                                                        <h5 class="modal-title" id="viewModalLabel{{ $libro->id }}">
-                                                            Detalles del libro</h5>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p><b>Título:</b> {{ $libro->titulo }}</p>
-                                                        <p><b>Autor:</b> {{ $libro->autor }}</p>
-                                                        <p><b>Año de publicación:</b> {{ $libro->año_publicacion }}</p>
-                                                        <p><b>Género:</b> {{ $libro->genero }}</p>
-                                                        <p><b>Idioma:</b> {{ $libro->idioma }}</p>
-                                                        <p><b>Cantidad en Stock:</b> {{ $libro->cantidad_stock }}</p>
-                                                        <p><b>Estado:</b>
-                                                            @if ($libro->estatus == 1)
-                                                                Disponible
-                                                            @else
-                                                                No disponible
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-dismiss="modal">Cerrar</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <a href="#showModal{{ $libro->id }}" data-toggle="modal" class="btn btn-warning" title="Editar">
-                                            <i class="fas fa-edit text-white"></i>
-                                        </a>
-
-                                        @include('admin.libros.components.editModal')
-
-                                        <!-- Botón que abre el modal -->
-                                        <button type="button" class="btn btn-danger" data-toggle="modal"
-                                            data-target="#confirmarEliminar{{ $libro->id }}" title="Eliminar">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-
-                                        <!-- Modal de confirmación -->
-                                        <div class="modal fade" id="confirmarEliminar{{ $libro->id }}" tabindex="-1"
-                                            role="dialog" aria-labelledby="modalLabel{{ $libro->id }}"
-                                            aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalLabel{{ $libro->id }}">
-                                                            Confirmar eliminación</h5>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Cerrar">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        ¿Estás seguro de que deseas eliminar este libro?
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <form action="{{ url('admin/libros/' . $libro->id) }}"
-                                                            method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-dismiss="modal">Cancelar</button>
-                                                            <button type="submit"
-                                                                class="btn btn-danger">Eliminar</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    <div class="d-flex justify-content-center mt-3">
-                        {{ $libros->appends(['buscar' => $buscar])->links() }}
-                    </div>
-                    @include('admin.libros.components.createModal')
-                </div>
-                <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
+<input type="hidden" id="FormOpen" value="0">
+<div id="content-wrapper">
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <h5><i class="icon fas fa-check"></i> ¡Éxito!</h5>
+            {{ session('success') }}
         </div>
+    @endif
+    @include('admin.libros.components.indexContent')
+    </div>
+</div>
 @stop
 
 @section('js')
@@ -215,72 +69,138 @@
         
     }
     
-    document.addEventListener('submit', (e) => {
-        const form = e.target
-        if (!form.matches('.editForm')) return
-        e.preventDefault()
 
-        const formData = new FormData(form)
-        fetch(form.action, {
+    $(document).on('submit', '.editForm', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        var formData = new FormData(this);
+        var csrf = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: $form.attr('action'),
             method: 'POST',
-            body: formData
-        }).then(res => {
-            if (!res.ok) throw new Error('Error al actualizar el libro')
-            return res.json()
-        }).then(data => {
-            if (data.success) {
-                // Cerrar la modal correspondiente al formulario
-                const $modal = $(form).closest('.modal')
-                $modal.modal('hide')
-                // Mostrar mensaje de éxito y recargar la tabla
-                showSuccessAlert(data.message || 'El libro se actualizó correctamente.')
-                reloadTable()
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+        }).done(function(resp){
+            fetchAndSwap('/admin/libros', function(){
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'success', title: 'Éxito', text: (resp && resp.message) ? resp.message : 'Libro actualizado correctamente.' });
+                }
+            });
+        }).fail(function(xhr){
+            let msg = 'Error al actualizar el libro.';
+            if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            } else {
+                alert(msg);
             }
-        }).catch(err => {
-            throw new Error(err)
-        })
-    })
+        });
+    });
 
-    //CREAR LIBRO
-    const createForm = document.querySelector('#createForm')
 
-    createForm.addEventListener('submit', (e) => {
-        /*Prevenir el envio del formulario*/
-        e.preventDefault()
-        const formData = new FormData(createForm)
-        /*Enviamos la peticion*/
-        fetch(createForm.action, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json'
-        },
-        /*Enviamos los datos del formulario*/
-        body: formData
+    // --- Navegación dinámica sin spinner ---
+    if (typeof Swal === 'undefined') {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+        document.head.appendChild(s);
+    }
 
-        }).then(res => {
-        /*Si la peticion no es correcta*/
-        if (!res.ok) {
-            if (res.status === 422) {
-            const data = res.json()
-            console.error('Errores de validación:', data)
+    function injectContent(html){
+        const target = document.getElementById('content-wrapper');
+        if (target) target.innerHTML = html;
+    }
+
+    function fetchAndSwap(url, onDone){
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        }).done(function(data){
+            injectContent(data);
+            history.pushState({urlPath: window.location.pathname}, document.title, url);
+            // Marcar estado de formulario según URL (create o edit)
+            if (/\/admin\/libros\/create(\b|\/|\?|$)/.test(url) || /\/admin\/libros\/(\d+|[^\/]+)\/edit(\b|\/|\?|$)/.test(url)) {
+                $('#FormOpen').val(1);
+            } else {
+                $('#FormOpen').val(0);
             }
-            throw new Error('Error al crear el libro')
-        }
-        /*Si la peticion es correcta*/
-        return res.json()
+            if (typeof onDone === 'function') onDone();
+        }).fail(function(){
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error', 'No se pudo cargar el contenido.', 'error');
+            } else {
+                alert('No se pudo cargar el contenido.');
+            }
+        });
+    }
 
-        }).then(data => {
-        /*Si la peticion es correcta*/
-        if (data.success) {
-            const $modal = $(createForm).closest('.modal')
-            $modal.modal('hide')
-            showSuccessAlert(data.message || 'El libro se creó correctamente.')
-            reloadTable()
+    function GoTo(url){
+        var formOpenVal = $('#FormOpen').val();
+        if (formOpenVal == 1 && typeof Swal !== 'undefined'){
+            Swal.fire({
+                title: '¿Quiere salir de esta pantalla?',
+                text: 'Esta acción causará que se pierdan los datos del formulario!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, salir!',
+                cancelButtonText: 'No, cancelar!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetchAndSwap(url);
+                    $('#FormOpen').val(0);
+                }
+            });
+        } else {
+            fetchAndSwap(url);
         }
-        }).catch(err => {
-            throw new Error(err)
-        })
-    })
+    }
+
+    window.addEventListener('popstate', function (event) {
+        if (event.state && event.state.urlPath) {
+            // Recargar el contenido para la URL actual
+            $.ajax({
+                url: location.pathname + location.search,
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).done(function(data){ injectContent(data); });
+        }
+    });
+
+    // Envío AJAX de creación: sin recargar, mostrar alerta y volver al listado
+    $(document).on('submit', '#createForm', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        var formData = new FormData(this);
+        var csrf = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: $form.attr('action'),
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+        }).done(function(resp){
+            // Volver al listado y mostrar alerta de éxito
+            fetchAndSwap('/admin/libros', function(){
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'success', title: 'Éxito', text: (resp && resp.message) ? resp.message : 'Libro creado correctamente.' });
+                }
+            });
+        }).fail(function(xhr){
+            let msg = 'Error al crear el libro.';
+            if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            } else {
+                alert(msg);
+            }
+        });
+    });
 
 </script>
 @endsection

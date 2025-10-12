@@ -12,19 +12,25 @@ class LibroController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $buscar = request()->input('buscar');
+        $buscar = $request->input('buscar');
         $libros = libro::buscarLibros($buscar, 10);
+        if ($request->ajax()) {
+            return view('admin.libros.components.indexContent', compact('libros', 'buscar'));
+        }
         return view('admin.libros.index', compact('libros', 'buscar'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.libros.create');
+        if ($request->ajax()) {
+            return view('admin.libros.components.createContent');
+        }
+        return redirect()->route('admin.libros.index'   );
     }
 
     /**
@@ -43,15 +49,21 @@ class LibroController extends Controller
         ]);
         try{
             libro::crearLibro($request->all());
-            return response()->json([
-                'success' => true,
-                'message' => 'Libro creado correctamente.',
-            ], 200);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Libro creado correctamente.',
+                ], 200);
+            }
+            return redirect()->route('admin.libros.index')->with('success', 'Libro creado correctamente.');
         }catch(Exception $e){
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear el libro.'. $e->getMessage(),
-            ], 500);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al crear el libro.'. $e->getMessage(),
+                ], 500);
+            }
+            return back()->withErrors(['general' => 'Error al crear el libro.'])->withInput();
         }
     }
 
@@ -61,6 +73,9 @@ class LibroController extends Controller
     public function edit($id)
     {
         $libro = libro::obtenerPorId($id);
+        if (request()->ajax()) {
+            return view('admin.libros.components.editContent', compact('libro', 'id'));
+        }
         return view('admin.libros.edit', compact('libro', 'id'));
     }
 
