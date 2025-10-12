@@ -306,7 +306,8 @@
                             <tbody>
                                 @foreach ($usuarios as $usuario)
                                     <tr>
-                                        <td style="text-align: center;">{{ $usuario->perfil }}</td>
+                                        <td style="text-align: center; text-transform:capitalize">{{ $usuario->perfil }}
+                                        </td>
                                         <td style="text-align: center;">{{ $usuario->name }}</td>
                                         <td style="text-align: center;">{{ $usuario->email }}</td>
                                         <td style="text-align: center;">

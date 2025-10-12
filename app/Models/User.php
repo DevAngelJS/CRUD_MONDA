@@ -27,6 +27,24 @@ class User extends Authenticatable
         'password',
     ];
 
+    public static function buscarUsuarios($buscar = null, $cantidad = 10)
+{
+    $query = DB::table('users');
+
+
+    if ($buscar) {
+        
+            $query->where(function ($q) use ($buscar) {
+                $q->where('perfil', 'like', "%{$buscar}%")
+                  ->orWhere('name', 'like', "%{$buscar}%")
+                  ->orWhere('email', 'like', "%{$buscar}%");
+            });
+
+    }
+
+    return $query->paginate($cantidad);
+}
+
     public static function obtenerTodos($cantidad = 10)
     {
         return DB::table('users')->paginate($cantidad);

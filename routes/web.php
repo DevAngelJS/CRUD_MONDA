@@ -30,3 +30,5 @@ Route::post('/admin/usuarios/{id}', [App\Http\Controllers\UserController::class,
 Route::get('/admin/contraseña/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('admin.libros.contraseña.edit')->middleware('auth');
 Route::post('/admin/contraseña/{id}', [App\Http\Controllers\UserController::class, 'updatePassword'])->name('admin.libros.contraseña.update')->middleware('auth');
 
+// Perfil usuario autenticado
+Route::get('/admin/usuarios/{id}', [App\Http\Controllers\UserController::class, 'show'])->name('admin.libros.usuarios.perfil');

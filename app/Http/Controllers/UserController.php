@@ -18,6 +18,15 @@ class UserController extends Controller
         return view('admin.libros.usuarios.index', compact('usuarios', 'perPage'));
     }
 
+    public function show($id)
+    {
+        $perPage = $request->get('perPage', 10);
+        $buscar = $request->get('buscar'); 
+    
+        $usuario = User::buscarUsuarios($buscar, $perPage);
+        return view('admin.libros.usuarios.perfil', compact('usuario', 'perPage', 'buscar'));
+    }
+
 
     public function store(Request $request)
     {
