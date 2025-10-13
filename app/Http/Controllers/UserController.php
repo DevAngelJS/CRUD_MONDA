@@ -20,11 +20,8 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $perPage = $request->get('perPage', 10);
-        $buscar = $request->get('buscar'); 
-    
-        $usuario = User::buscarUsuarios($buscar, $perPage);
-        return view('admin.libros.usuarios.perfil', compact('usuario', 'perPage', 'buscar'));
+        $usuario = User::buscarUsuarios($id);
+        return view('admin.libros.usuarios.perfil', compact('usuario'));
     }
 
 
