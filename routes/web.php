@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LibroController;
+use App\Http\Controllers\LibrosController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,3 +32,10 @@ Route::post('/admin/contraseña/{id}', [App\Http\Controllers\UserController::cla
 
 // Perfil usuario autenticado
 Route::get('/admin/usuarios/{id}', [App\Http\Controllers\UserController::class, 'show'])->name('admin.libros.usuarios.perfil');
+
+//Prestamos de libros
+
+Route::prefix('admin/prestamos')->group(function () {
+    Route::get('/', [App\Http\Controllers\PrestamosController::class, 'index'])->name('admin.prestamos.index');
+    Route::post('/', [App\Http\Controllers\PrestamosController::class, 'guardar'])->name('admin.prestamos.store');
+})->middleware('auth');
