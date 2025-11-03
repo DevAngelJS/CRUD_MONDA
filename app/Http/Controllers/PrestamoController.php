@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-
+use App\Models\Prestamo;
 use App\Models\libro;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -12,14 +12,28 @@ use Exception;
 
 class PrestamoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        //recuperamos los estudiantes a prestar(en este caso los usuarios de ejemplo)
-        $estudiantes = User::select('id','name')->get();
-        //recuperamos los libros a prestar
-        $libros = libro::select('id','titulo', 'autor')->get();
+        $buscar = $request->input('buscar');
+        $data = Prestamo::showData($buscar);
+        if($request->ajax()){
+            return view('admin.prestamo.indexContent', compact('data'));
+        }
 
-        return view('admin.prestamo.index', compact('estudiantes', 'libros'));
+        return view('admin.prestamo.index', compact('data'));
+    }
+
+
+
+    public function create(Request $request)
+    {
+        [$estudiantes, $libros] = Prestamo::obtenerTodos();
+
+        if($request->ajax()){
+            return view('admin.prestamo.createContent', compact('estudiantes', 'libros'));
+        }
+
+        return redirect()->route('admin.prestamo.index');
     }
 
     public function guardar(Request $request)
@@ -48,36 +62,19 @@ class PrestamoController extends Controller
         ]);
 
         if($validate){
-            try{
-                DB::beginTransaction();
-    
-                $prestamo_id = DB::table('prestamo_libro')->insertGetId([
-                    'usuario_id' => $validate['estudiante_id'],
-                    'fecha_inicio' => $validate['fecha_inicio'],
-                    'fecha_fin' => $validate['fecha_fin'],
-                    'descripcion' => $validate['descripcion'] ?? "Sin Descripcion",
-                    'estatus' => 1,
+            //Ejecutamos la funcion
+            [$isPass , $message] = Prestamo::guardarPrestamo($validate);
+
+            if($isPass){
+                return response()->json([
+                    'status' => 'success',
+                    'message' => $message
                 ]);
-                
-                //recuperamos el array de libros
-                $libros_colletion = $validate['libros'];
-    
-                foreach ($libros_colletion as $libroData) {
-                    //Inserta los libros en la tabla detalle_prestamo
-                    DB::table('detalle_prestamo')->insert([
-                        'prestamo_id' => $prestamo_id,
-                        'libro_id' => $libroData['libro_id'],
-                        'cantidad' => $libroData['cantidad'],
-                    ]);
-    
-                }
-    
-                DB::commit();
-    
-                return redirect()->route('admin.prestamos.index')->with('success', 'Prestamo guardado correctamente.');
-            }catch(Exception $e){
-                DB::rollBack();
-                return redirect()->route('admin.prestamos.index')->with('error', 'Error al guardar el prestamo.'.$e->getMessage());
+            }else{
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $message
+                ]);
             }
         }
         

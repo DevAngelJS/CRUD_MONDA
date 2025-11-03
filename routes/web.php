@@ -37,10 +37,6 @@ Route::get('/admin/usuarios/{id}', [App\Http\Controllers\UserController::class, 
 
 Route::prefix('admin/prestamo')->group(function () {
     Route::get('/', [App\Http\Controllers\PrestamoController::class, 'index'])->name('admin.prestamo.index');
+    Route::get('/create', [App\Http\Controllers\PrestamoController::class, 'create'])->name('admin.prestamo.create');
     Route::post('/', [App\Http\Controllers\PrestamoController::class, 'guardar'])->name('admin.prestamo.store');
-})->middleware('auth');
-
-Route::prefix('admin/prestamos')->group(function () {
-    Route::get('/', [App\Http\Controllers\PrestamosController::class, 'index'])->name('admin.prestamos.index');
-    Route::post('/', [App\Http\Controllers\PrestamosController::class, 'guardar'])->name('admin.prestamos.store');
 })->middleware('auth');
