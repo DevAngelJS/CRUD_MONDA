@@ -328,6 +328,14 @@ return [
         ],
         [
             'type' => 'pages',
+            'text' => 'Prestamo',
+            'url'  => 'admin/prestamo',
+            'icon' => 'fas fa-book',
+            'classes' => 'bg-primary',
+        ],
+
+        [
+            'type' => 'pages',
             'text' => 'Prestamos',
             'url'  => 'admin/prestamos',
             'icon' => 'fas fa-book',
