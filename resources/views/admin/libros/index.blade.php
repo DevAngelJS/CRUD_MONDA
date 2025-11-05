@@ -71,47 +71,8 @@
         }
 
 
-        $(document).on('submit', '.editForm', function(e) {
-            e.preventDefault();
-            var $form = $(this);
-            var formData = new FormData(this);
-            var csrf = $('meta[name="csrf-token"]').attr('content');
-            $.ajax({
-                url: $form.attr('action'),
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json'
-                }
-            }).done(function(resp) {
-                fetchAndSwap('/admin/libros', function() {
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Éxito',
-                            text: (resp && resp.message) ? resp.message :
-                                'Libro actualizado correctamente.'
-                        });
-                    }
-                });
-            }).fail(function(xhr) {
-                let msg = 'Error al actualizar el libro.';
-                if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: msg
-                    });
-                } else {
-                    alert(msg);
-                }
-            });
-        });
+
+
 
 
         // --- Navegación dinámica sin spinner ---
@@ -193,49 +154,62 @@
             }
         });
 
-        // Envío AJAX de creación: sin recargar, mostrar alerta y volver al listado
-        $(document).on('submit', '#createForm', function(e) {
+        $(document).on('submit', '.createForm, .editForm', function(e) {
             e.preventDefault();
-            var $form = $(this);
-            var formData = new FormData(this);
-            var csrf = $('meta[name="csrf-token"]').attr('content');
+
+            const $form = $(this);
+            const formData = new FormData(this);
+            const csrf = $('meta[name="csrf-token"]').attr('content');
+            const url = $form.attr('action');
+            const method = $form.find('input[name="_method"]').val() || 'POST';
 
             $.ajax({
-                url: $form.attr('action'),
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrf,
-                    'Accept': 'application/json'
-                }
-            }).done(function(resp) {
-                // Volver al listado y mostrar alerta de éxito
-                fetchAndSwap('/admin/libros', function() {
-                    if (typeof Swal !== 'undefined') {
+                    url: url,
+                    method: method,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json'
+                    }
+                })
+                .done(function(resp) {
+                    if (resp && resp.status === 'success') {
+                        if (typeof fetchAndSwap === 'function') {
+                            fetchAndSwap(window.routeLibrosIndex, function() {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Éxito',
+                                    text: resp.message
+                                });
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: resp.message
+                            }).then(() => window.location.href = window.routeLibrosIndex);
+                        }
+                    } else {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Éxito',
-                            text: (resp && resp.message) ? resp.message :
-                                'Libro creado correctamente.'
+                            icon: 'error',
+                            title: 'Error',
+                            text: resp?.message || 'Error desconocido.'
                         });
                     }
-                });
-            }).fail(function(xhr) {
-                let msg = 'Error al crear el libro.';
-                if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                if (typeof Swal !== 'undefined') {
+                })
+                .fail(function(xhr) {
+                    let msg = 'Error al procesar la solicitud.';
+                    if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
                         text: msg
                     });
-                } else {
-                    alert(msg);
-                }
-            });
+                });
         });
     </script>
 @endsection

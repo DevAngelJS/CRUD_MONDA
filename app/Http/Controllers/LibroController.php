@@ -38,7 +38,6 @@ class LibroController extends Controller
      */
     public function store(Request $request)
     {
-        // Validar los datos del formulario
         $request->validate([
             'titulo' => 'required|string|max:255',
             'autor' => 'required|string|max:255',
@@ -47,29 +46,35 @@ class LibroController extends Controller
             'idioma' => 'required|string|max:50',
             'cantidad_stock' => 'required|integer|min:0',
         ]);
-        try{
+
+        try {
             libro::crearLibro($request->all());
+
             if ($request->ajax()) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Libro creado correctamente.',
+                    'status' => 'success',
+                    'message' => 'Libro creado correctamente.'
                 ], 200);
             }
-            return redirect()->route('admin.libros.index')->with('success', 'Libro creado correctamente.');
-        }catch(Exception $e){
+
+            return redirect()
+                ->route('admin.libros.index')
+                ->with('success', 'Libro creado correctamente.');
+
+        } catch (Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Error al crear el libro.'. $e->getMessage(),
+                    'status' => 'error',
+                    'message' => 'Error al crear el libro. ' . $e->getMessage()
                 ], 500);
             }
-            return back()->withErrors(['general' => 'Error al crear el libro.'])->withInput();
+
+            return back()
+                ->withErrors(['general' => 'Error al crear el libro.'])
+                ->withInput();
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $libro = libro::obtenerPorId($id);
@@ -84,8 +89,7 @@ class LibroController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try{
-            // Validar los datos del formulario
+        try {
             $request->validate([
                 'titulo' => 'required|string|max:255',
                 'autor' => 'required|string|max:255',
@@ -94,19 +98,31 @@ class LibroController extends Controller
                 'idioma' => 'required|string|max:50',
                 'cantidad_stock' => 'required|integer|min:0',
             ]);
-    
-            libro::actualizarLibro($id, $request->all());
-    
-            return response()->json([
-                'success' => true,
-                'message' => 'Libro actualizado correctamente.',
-            ], 200);
 
-        }catch(Exception $e){
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar el libro.',
-            ], 500);
+            libro::actualizarLibro($id, $request->all());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Libro actualizado correctamente.'
+                ], 200);
+            }
+
+            return redirect()
+                ->route('admin.libros.index')
+                ->with('success', 'Libro actualizado correctamente.');
+
+        } catch (Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error al actualizar el libro. ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()
+                ->withErrors(['general' => 'Error al actualizar el libro.'])
+                ->withInput();
         }
     }
 

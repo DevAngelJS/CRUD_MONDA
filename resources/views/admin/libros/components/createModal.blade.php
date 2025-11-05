@@ -1,14 +1,11 @@
 <!-- MODAL DE CREAR LIBRO -->
-<div class="modal fade" id="createModal" tabindex="-1"
-    role="dialog" aria-labelledby="createModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-info">
                 <h5 class="modal-title" id="createModalLabel">
                     Crear libro</h5>
-                <button type="button" class="close" data-dismiss="modal"
-                    aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -21,8 +18,7 @@
                                 <label for="titulo">Título</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text inline-block"><i
-                                                class="fas fa-tag"></i></span>
+                                        <span class="input-group-text inline-block"><i class="fas fa-tag"></i></span>
                                     </div>
                                     <input type="text" class="form-control" id="titulo" name="titulo"
                                         placeholder="Ingrese el título del libro" value="{{ old('titulo') }}">
@@ -40,8 +36,7 @@
                                 <label for="autor">Autor</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text inline-block"><i
-                                                class="fas fa-pen"></i></span>
+                                        <span class="input-group-text inline-block"><i class="fas fa-pen"></i></span>
                                     </div>
                                     <input type="text" class="form-control" id="autor" name="autor"
                                         placeholder="Ingrese el autor del libro" value="{{ old('autor') }}">
@@ -81,8 +76,7 @@
                                 <label for="genero">Genero</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text inline-block"><i
-                                                class="fas fa-book"></i></span>
+                                        <span class="input-group-text inline-block"><i class="fas fa-book"></i></span>
                                     </div>
                                     <input type="text" class="form-control" id="genero" name="genero"
                                         placeholder="Ingrese el genero del libro" value="{{ old('genero') }}">
@@ -132,8 +126,7 @@
                                 <label for="cantidad_stock">Cantidad en Stock</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text inline-block"><i
-                                                class="fas fa-box"></i></span>
+                                        <span class="input-group-text inline-block"><i class="fas fa-box"></i></span>
                                     </div>
                                     <input type="number" class="form-control" id="cantidad_stock"
                                         name="cantidad_stock" placeholder="Ingrese la cantidad en stock del libro"
@@ -158,3 +151,6 @@
         </div>
     </div>
 </div>
+<script>
+    window.routeLibrosIndex = "{{ route('admin.libros.index') }}";
+</script>
