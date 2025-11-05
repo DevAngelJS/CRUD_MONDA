@@ -85,43 +85,65 @@ class Prestamo extends Model
         }
     }
 
-    public static function updatePrestamo($validate, $id){
-        try{
+    public static function updatePrestamo($validate, $id)
+    {
+        try {
             DB::beginTransaction();
 
+            // 1️⃣ Actualizamos el préstamo principal
             DB::table('prestamo_libro')
-            ->where('id', $id)
-            ->update([
-                'usuario_id' => $validate['estudiante_id'],
-                'fecha_inicio' => $validate['fecha_inicio'],
-                'fecha_fin' => $validate['fecha_fin'],
-                'descripcion' => $validate['descripcion'] ?? "Sin Descripcion",
-            ]);
-            
-            //Eliminamos los detalles anteriores
-            DB::table('detalle_prestamo')->where('prestamo_id', $id)->delete();
-
-            //recuperamos el array de libros
-            $libros_colletion = $validate['libros'];
-
-            foreach ($libros_colletion as $libroData) {
-                //Inserta los libros en la tabla detalle_prestamo
-                DB::table('detalle_prestamo')->insert([
-                    'prestamo_id' => $id,
-                    'libro_id' => $libroData['libro_id'],
-                    'cantidad' => $libroData['cantidad'],
+                ->where('id', $id)
+                ->update([
+                    'usuario_id'    => $validate['estudiante_id'],
+                    'fecha_inicio'  => $validate['fecha_inicio'],
+                    'fecha_fin'     => $validate['fecha_fin'],
+                    'descripcion'   => $validate['descripcion'] ?? "Sin Descripción",
                 ]);
 
+            // 2️⃣ Obtenemos los detalles actuales
+            $detallesActuales = DB::table('detalle_prestamo')
+                ->where('prestamo_id', $id)
+                ->pluck('id', 'libro_id') // [libro_id => detalle_id]
+                ->toArray();
+
+            // 3️⃣ Recorremos los nuevos libros enviados
+            $librosNuevos = $validate['libros'];
+            $librosNuevosIds = [];
+
+            foreach ($librosNuevos as $libroData) {
+                $libro_id = $libroData['libro_id'];
+                $cantidad = $libroData['cantidad'];
+                $librosNuevosIds[] = $libro_id;
+
+                // Si ya existe, actualizamos cantidad
+                if (isset($detallesActuales[$libro_id])) {
+                    DB::table('detalle_prestamo')
+                        ->where('id', $detallesActuales[$libro_id])
+                        ->update(['cantidad' => $cantidad]);
+                } else {
+                    // Si no existe, insertamos nuevo detalle
+                    DB::table('detalle_prestamo')->insert([
+                        'prestamo_id' => $id,
+                        'libro_id'    => $libro_id,
+                        'cantidad'    => $cantidad,
+                    ]);
+                }
             }
+
+            // 4️⃣ Eliminamos los libros que ya no están en la nueva lista
+            DB::table('detalle_prestamo')
+                ->where('prestamo_id', $id)
+                ->whereNotIn('libro_id', $librosNuevosIds)
+                ->delete();
 
             DB::commit();
 
-            return [true, 'Prestamo actualizado correctamente'];
-        }catch(Exception $e){
+            return [true, 'Préstamo actualizado correctamente'];
+        } catch (Exception $e) {
             DB::rollBack();
-            
-            return [false, 'Error al actualizar el prestamo'. $e->getMessage()];
+            return [false, 'Error al actualizar el préstamo: ' . $e->getMessage()];
         }
     }
+
 
 }
