@@ -1,38 +1,122 @@
-// Función para ocultar mensajes después de un tiempo
-function ocultarMensajes() {
-    // Ocultar mensajes de éxito después de 5 segundos
-    const mensajesExito = document.querySelectorAll('.alert-success');
-    mensajesExito.forEach(mensaje => {
-        setTimeout(() => {
-            mensaje.style.transition = 'opacity 0.5s';
-            mensaje.style.opacity = '0';
-            setTimeout(() => mensaje.remove(), 500);
-        }, 5000);
+// ---------------------- Inicio: Inicialización dinámica del formulario ----------------------
+/**
+ * initPrestamoForm: inicializa todos los handlers del formulario de préstamo.
+ * Llamar cada vez que se inserte el HTML del formulario por AJAX.
+ */
+window.initPrestamoForm = function initPrestamoForm() {
+    // ocultarMensajes() ya lo tienes definido; ejecutarlo si existe
+    if (typeof ocultarMensajes === 'function') ocultarMensajes();
+
+    // Soportar ambos IDs (form-prestamo o editForm)
+    const form = document.getElementById('form-prestamo') || document.getElementById('editForm');
+    if (!form) return;
+
+    // ---------------- Opciones del select de libros ----------------
+    // Si el servidor provee window.librosOptions puedes usarlo.
+    // Si no, tomamos las opciones del primer select-libro existente.
+    let opcionesHTML = (window.librosOptions && String(window.librosOptions).trim().length) ? window.librosOptions : null;
+    if (!opcionesHTML) {
+        const primerSelect = form.querySelector('.select-libro');
+        if (primerSelect) opcionesHTML = primerSelect.innerHTML;
+        else opcionesHTML = '<option value="">Seleccione un libro</option>';
+    }
+
+    // ---------------- Contador inicial (busca el mayor índice en los name existentes) ----------------
+    let contadorLibros = 0;
+    const nameRegex = /libros\[(\d+)\]\[libro_id\]/;
+    form.querySelectorAll('select[name]').forEach(s => {
+        const match = s.name.match(nameRegex);
+        if (match && match[1]) {
+            const idx = parseInt(match[1], 10);
+            if (!isNaN(idx) && idx > contadorLibros) contadorLibros = idx;
+        }
     });
+    // Aseguramos que el siguiente sea +1
+    contadorLibros = contadorLibros;
 
-    // Ocultar mensajes de error después de 5 segundos
-    const mensajesError = document.querySelectorAll('.alert-danger, .invalid-feedback');
-    mensajesError.forEach(mensaje => {
-        setTimeout(() => {
-            mensaje.style.transition = 'opacity 0.5s';
-            mensaje.style.opacity = '0';
-            setTimeout(() => mensaje.remove(), 500);
-        }, 5000);
-    });
-}
+    // ---------------- Funciones auxiliares ----------------
+    function actualizarBotonesEliminar() {
+        const botones = form.querySelectorAll('.btn-eliminar-libro');
+        const items = form.querySelectorAll('.libro-item');
+        botones.forEach(boton => {
+            boton.disabled = (items.length === 1);
+            if (boton.disabled) boton.classList.add('disabled'); else boton.classList.remove('disabled');
+        });
+    }
 
+    function crearElementoLibro(index) {
+        return `
+            <div class="row libro-item mb-3">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label>Libro</label>
+                        <select class="form-control select-libro" name="libros[${index}][libro_id]" required>
+                            ${opcionesHTML}
+                        </select>
+                        <div class="invalid-feedback d-none" id="libro-${index}-error"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" class="form-control cantidad-libro" 
+                               name="libros[${index}][cantidad]" min="1" value="1" required>
+                        <div class="invalid-feedback d-none" id="cantidad-${index}-error"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center mt-3">
+                    <button type="button" class="btn btn-danger btn-eliminar-libro">
+                        <i class="fas fa-trash"></i> Quitar
+                    </button>
+                </div>
+            </div>
+        `;
+    }
 
+    // ---------------- Event: Agregar libro ----------------
+    const btnAgregar = form.querySelector('#agregar-libro');
+    if (btnAgregar) {
+        // quitar listeners previos para evitar duplicados
+        btnAgregar.replaceWith(btnAgregar.cloneNode(true));
+    }
+    const btnAgregarNuevo = form.querySelector('#agregar-libro');
+    if (btnAgregarNuevo) {
+        btnAgregarNuevo.addEventListener('click', function () {
+            contadorLibros++;
+            const container = form.querySelector('#libros-container');
+            if (!container) return;
+            container.insertAdjacentHTML('beforeend', crearElementoLibro(contadorLibros));
+            actualizarBotonesEliminar();
+        });
+    }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Ocultar mensajes al cargar la página
-    ocultarMensajes();
-    
-    // Configurar validación en tiempo real
-    const form = document.getElementById('form-prestamo');
+    // ---------------- Delegación: Eliminar libro (delegación local al contenedor del form) ----------------
+    const librosContainer = form.querySelector('#libros-container');
+    if (librosContainer) {
+        // eliminar event listener previo si existiera (evitar duplicados)
+        librosContainer.replaceWith(librosContainer.cloneNode(true));
+    }
+    const librosContainerNuevo = form.querySelector('#libros-container');
+    if (librosContainerNuevo) {
+        librosContainerNuevo.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-eliminar-libro');
+            if (!btn) return;
+            const items = form.querySelectorAll('.libro-item');
+            if (items.length > 1) {
+                const fila = btn.closest('.libro-item');
+                if (fila) fila.remove();
+                actualizarBotonesEliminar();
+            }
+        });
+    }
+
+    // ---------------- Validaciones y comportamiento de inputs que tenías ----------------
+    // Quitar clase is-invalid al escribir
     const inputs = form.querySelectorAll('input, select, textarea');
-    
     inputs.forEach(input => {
-        input.addEventListener('input', function() {
+        // remover listeners previos para evitar duplicados (si se re-inicia varias veces)
+        input.removeEventListener('input', input._removeInvalidListener);
+        const listener = function () {
             if (this.classList.contains('is-invalid')) {
                 this.classList.remove('is-invalid');
                 const errorMsg = this.nextElementSibling;
@@ -40,11 +124,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMsg.style.display = 'none';
                 }
             }
-        });
-        
-        // Para los campos de fecha, validar cuando pierden el foco
+        };
+        input.addEventListener('input', listener);
+        input._removeInvalidListener = listener;
+
         if (input.type === 'date') {
-            input.addEventListener('change', function() {
+            input.removeEventListener('change', input._dateListener);
+            const dateListener = function () {
                 if (this.value) {
                     this.classList.remove('is-invalid');
                     const errorMsg = this.nextElementSibling;
@@ -52,102 +138,50 @@ document.addEventListener('DOMContentLoaded', function() {
                         errorMsg.style.display = 'none';
                     }
                 }
-            });
+            };
+            input.addEventListener('change', dateListener);
+            input._dateListener = dateListener;
         }
     });
 
-    let contadorLibros = 0;
-    document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('cantidad-libro')) {
-            if (e.target.value < 1) {
-                e.target.value = 1;
-            }
+    // Forzar cantidad mínima a 1
+    form.removeEventListener('change', form._cantidadListener);
+    const cantidadListener = function (e) {
+        if (e.target && e.target.classList && e.target.classList.contains('cantidad-libro')) {
+            if (Number(e.target.value) < 1 || e.target.value === '') e.target.value = 1;
         }
-    });
+    };
+    form.addEventListener('change', cantidadListener);
+    form._cantidadListener = cantidadListener;
 
-    // Agregar nuevo libro
-    document.getElementById('agregar-libro').addEventListener('click', function() {
-        contadorLibros++;
-        
-        const nuevoLibro = `
-            <div class="row libro-item mb-3">
-                <div class="col-md-5">
-                    <div class="form-group">
-                        <label>Libro</label>
-                        <select class="form-control select-libro" name="libros[${contadorLibros}][libro_id]" required>
-                            <option value="">Seleccione un libro</option>
-                            @foreach($libros as $libro)
-                                <option value="{{ $libro->id }}">{{ $libro->titulo }} - {{ $libro->autor }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback d-none" id="libro-${contadorLibros}-error"></div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Cantidad</label>
-                        <input type="number" class="form-control cantidad-libro" 
-                                name="libros[${contadorLibros}][cantidad]" min="1" value="1" required>
-                        <div class="invalid-feedback d-none" id="cantidad-${contadorLibros}-error"></div>
-                    </div>
-                </div>
-                <div class="col-md-4 d-flex align-items-center mt-3">
-                    <button type="button" class="btn btn-danger btn-eliminar-libro" disabled>
-                        <i class="fas fa-trash"></i> Quitar
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('libros-container').insertAdjacentHTML('beforeend', nuevoLibro);
-        actualizarBotonesEliminar();
-    });
-
-    // Eliminar libro
-    function eliminarLibro(boton) {
-        const items = document.querySelectorAll('.libro-item');
-        if (items.length > 1) {
-            boton.closest('.libro-item').remove();
-            actualizarBotonesEliminar();
-        }
+    // ---------------- Contador de caracteres para descripción ----------------
+    const descripcionField = form.querySelector('#descripcion');
+    const contador = form.querySelector('#contador-caracteres');
+    if (descripcionField) {
+        descripcionField.removeEventListener('input', descripcionField._charListener);
+        const charListener = function () {
+            if (contador) contador.textContent = this.value.length;
+        };
+        descripcionField.addEventListener('input', charListener);
+        descripcionField._charListener = charListener;
+        // set initial counter text
+        if (contador) contador.textContent = descripcionField.value.length;
     }
 
-    // Actualizar estado de botones eliminar
-    function actualizarBotonesEliminar() {
-        const botones = document.querySelectorAll('.btn-eliminar-libro');
-        const items = document.querySelectorAll('.libro-item');
-        
-        botones.forEach(boton => {
-            if (items.length === 1) {
-                boton.disabled = true;
-                boton.classList.add('disabled');
-            } else {
-                boton.disabled = false;
-                boton.classList.remove('disabled');
-            }
-        });
-    }
+    // ---------------- Reset del formulario: re-inicializar (para mantener estado consistente) ----------------
+    form.removeEventListener('reset', form._resetListener);
+    const resetListener = function () {
+        // esperar que el reset se aplique
+        setTimeout(() => {
+            initPrestamoForm();
+        }, 50);
+    };
+    form.addEventListener('reset', resetListener);
+    form._resetListener = resetListener;
 
-    // Delegación de eventos para botones eliminar
-    document.getElementById('libros-container').addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-eliminar-libro') || 
-            e.target.closest('.btn-eliminar-libro')) {
-            const boton = e.target.classList.contains('btn-eliminar-libro') ? 
-                            e.target : e.target.closest('.btn-eliminar-libro');
-            eliminarLibro(boton);
-        }
-    });
-
-    // Inicializar botones
+    // Finalmente actualizar botones eliminar según el estado actual
     actualizarBotonesEliminar();
-
-    // Contador de caracteres para la descripción
-    document.getElementById('descripcion').addEventListener('input', function() {
-        const maxLength = this.getAttribute('maxlength');
-        const currentLength = this.value.length;
-        document.getElementById('contador-caracteres').textContent = currentLength;
-    });
-});
+};
 
 //PARTE DE AJAX
 
@@ -198,33 +232,47 @@ function reloadTable(){
 }
 
 
-$(document).on('submit', '.editForm', function(e){
+// Reemplaza o añade este handler (asegúrate de que esté cargado después de jQuery)
+$(document).on('submit', '#editForm, .editForm', function(e){
     e.preventDefault();
     var $form = $(this);
     var formData = new FormData(this);
     var csrf = $('meta[name="csrf-token"]').attr('content');
+
+    // Si usas method spoofing (<input name="_method" value="PUT">) lo tomamos:
+    var method = ($form.find('input[name="_method"]').val() || $form.attr('method') || 'POST').toUpperCase();
+
     $.ajax({
-        url: $form.attr('action'),
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+    url: $form.attr('action'),
+    method: method,
+    data: formData,
+    processData: false,
+    contentType: false,
+    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
     }).done(function(resp){
-        fetchAndSwap('/admin/prestamo', function(){
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'success', title: 'Éxito', text: (resp && resp.message) ? resp.message : 'Prestamo actualizado correctamente.' });
+        if (resp && resp.status === 'success') {
+            if (typeof fetchAndSwap === 'function') {
+                fetchAndSwap(window.routePrestamoIndex, function(){
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'success', title: 'Éxito', text: resp.message || 'Préstamo actualizado correctamente.' });
+                    }
+                });
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'success', title: 'Éxito', text: resp.message || 'Préstamo actualizado correctamente.' })
+                    .then(() => window.location.href = window.routePrestamoIndex);
+                } else {
+                    window.location.href = window.routePrestamoIndex;
+                }
             }
-        });
-    }).fail(function(xhr){
-        let msg = 'Error al actualizar el prestamo.';
-        if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({ icon: 'error', title: 'Error', text: msg });
         } else {
-            alert(msg);
+            var msg = (resp && resp.message) ? resp.message : 'Respuesta inesperada del servidor.';
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            } else { alert(msg); }
         }
     });
+
 });
 
 
@@ -248,12 +296,19 @@ function fetchAndSwap(url, onDone){
     }).done(function(data){
         injectContent(data);
         history.pushState({urlPath: window.location.pathname}, document.title, url);
+
+        // <-- RE-INITIALIZAR aquí -->
+        if (typeof window.initPrestamoForm === 'function') {
+            try { window.initPrestamoForm(); } catch(err) { console.error('Error initPrestamoForm:', err); }
+        }
+
         // Marcar estado de formulario según URL (create o edit)
         if (/\/admin\/prestamo\/create(\b|\/|\?|$)/.test(url) || /\/admin\/prestamo\/(\d+|[^\/]+)\/edit(\b|\/|\?|$)/.test(url)) {
             $('#FormOpen').val(1);
         } else {
             $('#FormOpen').val(0);
         }
+
         if (typeof onDone === 'function') onDone();
     }).fail(function(){
         if (typeof Swal !== 'undefined') {
@@ -263,6 +318,11 @@ function fetchAndSwap(url, onDone){
         }
     });
 }
+
+// ---------------------- Ejecutar init al cargar la página por primera vez ----------------------
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window.initPrestamoForm === 'function') window.initPrestamoForm();
+});
 
 function GoTo(url){
     var formOpenVal = $('#FormOpen').val();
@@ -311,16 +371,45 @@ $(document).on('submit', '#form-prestamo', function(e){
         data: formData,
         processData: false,
         contentType: false,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+        headers: { 
+            'X-Requested-With': 'XMLHttpRequest', 
+            'X-CSRF-TOKEN': csrf, 
+            'Accept': 'application/json' 
+        }
     }).done(function(resp){
-        // Volver al listado y mostrar alerta de éxito
-        fetchAndSwap('/admin/prestamo', function(){
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'success', title: 'Éxito', text: (resp && resp.message) ? resp.message : 'Prestamo creado correctamente.' });
+        // Éxito: volver al listado y mostrar alerta
+        if (resp && resp.status === 'success') {
+            if (typeof fetchAndSwap === 'function') {
+                fetchAndSwap(window.routePrestamoIndex, function(){
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: resp.message || 'Préstamo creado correctamente.'
+                        });
+                    }
+                });
+            } else {
+                // Si no existe fetchAndSwap, recargar con redirect
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: resp.message || 'Préstamo creado correctamente.'
+                    }).then(() => window.location.href = window.routePrestamoIndex);
+                } else {
+                    window.location.href = window.routePrestamoIndex;
+                }
             }
-        });
+        } else {
+            // Si la respuesta no tiene status esperado
+            var msg = (resp && resp.message) ? resp.message : 'Respuesta inesperada del servidor.';
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            } else { alert(msg); }
+        }
     }).fail(function(xhr){
-        let msg = 'Error al crear el prestamo.';
+        let msg = 'Error al crear el préstamo.';
         if (xhr && xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
         if (typeof Swal !== 'undefined') {
             Swal.fire({ icon: 'error', title: 'Error', text: msg });
@@ -329,4 +418,5 @@ $(document).on('submit', '#form-prestamo', function(e){
         }
     });
 });
+
 

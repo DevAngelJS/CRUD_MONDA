@@ -39,4 +39,7 @@ Route::prefix('admin/prestamo')->group(function () {
     Route::get('/', [App\Http\Controllers\PrestamoController::class, 'index'])->name('admin.prestamo.index');
     Route::get('/create', [App\Http\Controllers\PrestamoController::class, 'create'])->name('admin.prestamo.create');
     Route::post('/', [App\Http\Controllers\PrestamoController::class, 'guardar'])->name('admin.prestamo.store');
+    Route::get('/{id}/edit', [App\Http\Controllers\PrestamoController::class, 'edit'])->name('admin.prestamo.edit');
+    Route::post('/{id}', [App\Http\Controllers\PrestamoController::class, 'update'])->name('admin.prestamo.update');
+    Route::delete('/{id}', [App\Http\Controllers\PrestamoController::class, 'destroy'])->name('admin.prestamo.destroy');
 })->middleware('auth');

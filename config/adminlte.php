@@ -336,14 +336,6 @@ return [
 
         [
             'type' => 'pages',
-            'text' => 'Prestamos',
-            'url'  => 'admin/prestamos',
-            'icon' => 'fas fa-book',
-            'classes' => 'bg-primary',
-        ],
-
-        [
-            'type' => 'pages',
             'text' => 'Usuarios',
             'url'  => 'admin/usuarios',
             'icon' => 'fas fa-user',

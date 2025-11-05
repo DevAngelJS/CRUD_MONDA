@@ -85,4 +85,43 @@ class Prestamo extends Model
         }
     }
 
+    public static function updatePrestamo($validate, $id){
+        try{
+            DB::beginTransaction();
+
+            DB::table('prestamo_libro')
+            ->where('id', $id)
+            ->update([
+                'usuario_id' => $validate['estudiante_id'],
+                'fecha_inicio' => $validate['fecha_inicio'],
+                'fecha_fin' => $validate['fecha_fin'],
+                'descripcion' => $validate['descripcion'] ?? "Sin Descripcion",
+            ]);
+            
+            //Eliminamos los detalles anteriores
+            DB::table('detalle_prestamo')->where('prestamo_id', $id)->delete();
+
+            //recuperamos el array de libros
+            $libros_colletion = $validate['libros'];
+
+            foreach ($libros_colletion as $libroData) {
+                //Inserta los libros en la tabla detalle_prestamo
+                DB::table('detalle_prestamo')->insert([
+                    'prestamo_id' => $id,
+                    'libro_id' => $libroData['libro_id'],
+                    'cantidad' => $libroData['cantidad'],
+                ]);
+
+            }
+
+            DB::commit();
+
+            return [true, 'Prestamo actualizado correctamente'];
+        }catch(Exception $e){
+            DB::rollBack();
+            
+            return [false, 'Error al actualizar el prestamo'. $e->getMessage()];
+        }
+    }
+
 }
