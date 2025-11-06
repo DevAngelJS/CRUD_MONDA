@@ -15,12 +15,12 @@ class PrestamoController extends Controller
     public function index(Request $request)
     {
         $buscar = $request->input('buscar');
-        $data = Prestamo::showData($buscar);
+        [$data, $libros] = Prestamo::showData($buscar);
         if($request->ajax()){
-            return view('admin.prestamo.indexContent', compact('data'));
+            return view('admin.prestamo.indexContent', compact('data', 'libros'));
         }
 
-        return view('admin.prestamo.index', compact('data'));
+        return view('admin.prestamo.index', compact('data', 'libros'));
     }
 
 
@@ -82,17 +82,16 @@ class PrestamoController extends Controller
 
     public function edit($id)
     {
-        \Log::info('Edit method called with ID: ' . $id);
+
         
         [$estudiantes, $libros] = Prestamo::obtenerTodos();
-        \Log::info('Estudiantes: ' . $estudiantes->count());
-        \Log::info('Libros: ' . $libros->count());
+
         
         try {
             $data = Prestamo::find($id);
-            \Log::info('Préstamo encontrado: ' . ($data ? 'Sí' : 'No'));
+
         } catch (\Exception $e) {
-            \Log::error('Error al buscar préstamo: ' . $e->getMessage());
+
             throw $e;
         }
         
@@ -158,5 +157,17 @@ class PrestamoController extends Controller
         }
 
         return redirect()->route('admin.prestamo.index')->with('error', 'Préstamo no encontrado.');
+    }
+
+    public function details(Request $request){
+        $id = $request->input('id');
+        $data = Prestamo::details($id);
+        if($request->ajax()){
+            return response()->json([
+                'status' => 'success',
+                'data' => $data
+            ]);
+        }
+        return redirect()->route('admin.prestamo.index');
     }
 }

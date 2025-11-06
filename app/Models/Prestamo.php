@@ -37,19 +37,57 @@ class Prestamo extends Model
     public static function showData($buscar = null)
     {
         $data = DB::table('prestamo_libro')
-        ->join('users', 'prestamo_libro.usuario_id', '=', 'users.id')
-        ->join('detalle_prestamo', 'prestamo_libro.id', '=', 'detalle_prestamo.prestamo_id')
-        ->select('prestamo_libro.id', 'users.name', 'detalle_prestamo.libro_id', 'detalle_prestamo.cantidad', 'prestamo_libro.fecha_inicio', 'prestamo_libro.fecha_fin', 'prestamo_libro.descripcion', 'prestamo_libro.estatus')
-        ->where('prestamo_libro.estatus', 1);
+            ->join('users', 'prestamo_libro.usuario_id', '=', 'users.id')
+            ->join('detalle_prestamo', 'prestamo_libro.id', '=', 'detalle_prestamo.prestamo_id')
+            ->select(
+                'prestamo_libro.id', 
+                'users.name', 
+                'users.id as user_id',
+                DB::raw('SUM(detalle_prestamo.cantidad) as cantidad'),
+                'prestamo_libro.fecha_inicio', 
+                'prestamo_libro.fecha_fin', 
+                'prestamo_libro.descripcion', 
+                'prestamo_libro.estatus'
+            )
+            ->groupBy(
+                'prestamo_libro.id',
+                'users.name',
+                'users.id',
+                'prestamo_libro.fecha_inicio',
+                'prestamo_libro.fecha_fin',
+                'prestamo_libro.descripcion',
+                'prestamo_libro.estatus'
+            )  
+            ->where('prestamo_libro.estatus', 1);
 
-        //Buscamos por nombre
         if($buscar){
             $data->where('users.name', 'like', "%{$buscar}%");
-        }   
+        }
 
-        return $data->paginate(10);
+        $resultado = $data->paginate(10);
+
+        // Recuperamos los IDs de los préstamos
+        $prestamo_ids = $resultado->pluck('id');
+
+        // Recuperamos los libros agrupados por préstamo
+        $libros = self::details($prestamo_ids)->groupBy('prestamo_id');
+
+        return [$resultado, $libros];
     }
 
+        //Funcion para verificar el stock de los libros
+    private static function verificarStock($cantidad, $idLibro){
+        $cantidad = DB::table('libros')
+            ->where('id', $idLibro)
+            ->where('cantidad_stock', '>=', $cantidad)
+            ->first();
+
+        if(!$cantidad){
+            return false;
+        }
+
+        return true;
+    }
     public static function guardarPrestamo($validate){
         try{
             DB::beginTransaction();
@@ -67,11 +105,23 @@ class Prestamo extends Model
 
             foreach ($libros_colletion as $libroData) {
                 //Inserta los libros en la tabla detalle_prestamo
+                //verificamos si hay la cantidad de libros disponibles
+
+                if(!self::verificarStock($libroData['cantidad'], $libroData['libro_id'])){
+                    DB::rollBack();
+                    return [false, 'No hay suficientes libros disponibles'];
+                }
+
+
                 DB::table('detalle_prestamo')->insert([
                     'prestamo_id' => $prestamo_id,
                     'libro_id' => $libroData['libro_id'],
                     'cantidad' => $libroData['cantidad'],
                 ]);
+
+                //restamos al stock
+                DB::table('libros')
+                    ->where('id', $libroData['libro_id'])->decrement('cantidad_stock', $libroData['cantidad']);
 
             }
 
@@ -143,6 +193,23 @@ class Prestamo extends Model
             DB::rollBack();
             return [false, 'Error al actualizar el préstamo: ' . $e->getMessage()];
         }
+    }
+
+    public static function details($prestamo_id)
+    {
+
+        $libros = DB::table('detalle_prestamo')
+        ->join('libros', 'detalle_prestamo.libro_id', '=', 'libros.id')
+        ->select(
+            'detalle_prestamo.prestamo_id', // ← IMPORTANTE: agregar esta columna
+            'libros.titulo',
+            'libros.autor',
+            'detalle_prestamo.cantidad'
+        )
+        ->whereIn('detalle_prestamo.prestamo_id', $prestamo_id) // ← Usar whereIn
+        ->get();
+
+    return $libros;
     }
 
 

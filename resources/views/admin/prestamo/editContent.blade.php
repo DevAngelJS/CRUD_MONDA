@@ -12,7 +12,7 @@
                         <label for="estudiante_id">Estudiante</label>
                         <select class="form-control select2 @error('estudiante_id') is-invalid @enderror"
                             id="estudiante_id" name="estudiante_id" required>
-                            <option value="">Seleccione un estudiante</option>
+                            <option value="" selected disabled>Seleccione un estudiante</option>
                             @foreach ($estudiantes as $estudiante)
                                 <option value="{{ $estudiante->id }}"
                                     {{ old('estudiante_id', $data->usuario_id) == $estudiante->id ? 'selected' : '' }}>
@@ -92,7 +92,7 @@
                                         <label>Libro</label>
                                         <select class="form-control select-libro"
                                             name="libros[{{ $i }}][libro_id]" required>
-                                            <option value="">Seleccione un libro</option>
+                                            <option value="" selected disabled>Seleccione un libro</option>
                                             @foreach ($libros as $libro)
                                                 <option value="{{ $libro->id }}"
                                                     {{ $detalle->libro_id == $libro->id ? 'selected' : '' }}>
@@ -127,7 +127,7 @@
                                     <div class="form-group">
                                         <label>Libro</label>
                                         <select class="form-control select-libro" name="libros[0][libro_id]" required>
-                                            <option value="">Seleccione un libro</option>
+                                            <option value="" selected disabled>Seleccione un libro</option>
                                             @foreach ($libros as $libro)
                                                 <option value="{{ $libro->id }}">{{ $libro->titulo }} -
                                                     {{ $libro->autor }}</option>

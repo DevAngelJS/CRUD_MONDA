@@ -83,6 +83,24 @@
                                                             Devuelto
                                                         @endif
                                                     </p>
+                                                    <hr>
+                                                    <h4>Libros prestados</h4>
+                                                    <div class="list-group">
+                                                        @foreach ($libros[$persona->id] as $libro)
+                                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <i class="fas fa-book text-primary mr-3"></i>
+                                                                    <div>
+                                                                        <span class="font-weight-bold text-dark">{{ $libro->titulo }}</span>
+                                                                        <small class="text-muted ml-2">- {{$libro->autor}}</small>
+                                                                    </div>
+                                                                </div>
+                                                                <span class="badge badge-primary badge-pill">
+                                                                    {{ $libro->cantidad ?? 1 }} {{ $libro->cantidad == 1 ? 'ejemplar' : 'ejemplares' }}
+                                                                </span>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
